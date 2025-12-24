@@ -1,0 +1,37 @@
+{
+    "name": "voboost-stubs",
+    "version": "1.0.0",
+    "description": "Stub applications for testing Frida agents locally",
+    "type": "module",
+    "scripts": {
+        "test": "ava --config config/config-ava.mjs",
+        "test:verbose": "DEBUG=true ava --verbose --config config/config-ava.mjs",
+        "test:launcher": "ava test/launcher.test.js --config config/config-ava.mjs",
+        "test:phone": "ava test/bluetoothphone.test.js --config config/config-ava.mjs",
+        "test:system": "ava test/systemservice.test.js --config config/config-ava.mjs",
+        "test:qgime": "ava test/qgime.test.js --config config/config-ava.mjs",
+        "test:vehicle": "ava test/vehiclesetting.test.js --config config/config-ava.mjs",
+        "start": "./gradlew buildAllStubJars && concurrently \"npm:start:*\"",
+        "start:launcher": "java -jar build/LauncherStub.jar",
+        "start:phone": "java -jar build/BluetoothPhoneStub.jar",
+        "start:system": "java -jar build/SystemServiceStub.jar",
+        "start:qgime": "java -jar build/QgimeStub.jar",
+        "start:vehicle": "java -jar build/VehicleSettingStub.jar",
+        "lint": "npm run lint:js && npm run lint:kt",
+        "lint:js": "eslint lib test --fix --config config/config-eslint.mjs && prettier --write 'lib/**/*.js' 'test/**/*.js' 'config/**/*.mjs' --config ../voboost-codestyle/config-prettier.mjs",
+        "lint:kt": "./gradlew checkJavaStyle",
+        "p": "./gradlew build",
+        "p:build": "./gradlew build"
+    },
+    "devDependencies": {
+        "@eslint/js": "^9.39.2",
+        "ava": "^6.4.1",
+        "concurrently": "^9.2.1",
+        "eslint": "^9.39.2",
+        "eslint-config-prettier": "^10.1.8",
+        "frida-java-bridge": "7.0.10",
+        "globals": "^16.5.0",
+        "prettier": "^3.7.4"
+    }
+}
+
