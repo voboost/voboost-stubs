@@ -22,8 +22,7 @@
         "lint": "npm run lint:js && npm run lint:java",
         "lint:js": "eslint lib test --fix --config config/config-eslint.mjs && prettier --write 'lib/**/*.js' 'test/**/*.js' 'config/**/*.mjs' --config ../voboost-codestyle/config-prettier.mjs",
         "lint:java": "./gradlew checkJavaStyle",
-        "p": "./gradlew build",
-        "p:build": "./gradlew build"
+        "build": "./gradlew build"
     },
     "devDependencies": {
         "@eslint/js": "^9.39.2",
