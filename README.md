@@ -40,6 +40,8 @@ sudo cp frida-inject-*-macos-universal/bin/frida-inject /usr/local/bin/
 npm install
 ```
 
+**Note**: The `frida-java-bridge` package is included as a devDependency for type definitions and IDE support. It is not used at runtime - actual Frida injection uses the system-installed `frida-inject` tool.
+
 ### Windows
 
 1. Install Java (JDK 11+):
@@ -111,46 +113,10 @@ cd voboost-stubs
 
 This compiles all stub applications and creates executable JAR files in the `build/` directory.
 
-### 3. Start stub process
+### 3. Run tests
 
-**macOS/Linux:**
 ```bash
-# Start individual stub
-npm run start:launcher
-
-# Start CanBus-related stubs (systemservice + vehiclesetting)
-npm run start:canbus
-
-# Or start all stubs concurrently
-npm start
-```
-
-**Windows:**
-```powershell
-# Start individual stub
-npm run start:launcher
-
-# Start CanBus-related stubs (systemservice + vehiclesetting)
-npm run start:canbus
-
-# Or start all stubs concurrently
-npm start
-```
-
-### 4. Run voboost desktop
-
-In another terminal:
-
-**macOS/Linux:**
-```bash
-cd ../voboost
-./gradlew runDesktop
-```
-
-**Windows:**
-```powershell
-cd ..\voboost
-.\gradlew.bat runDesktop
+npm test
 ```
 
 ## Available Stubs
@@ -159,150 +125,132 @@ cd ..\voboost
 |------|--------------|--------|
 | LauncherStub | com.qinggan.app.launcher | weather-widget-mod, app-launcher-mod, navbar-launcher-mod, app-viewport-mod, media-source-mod, media-window-mod |
 | BluetoothPhoneStub | com.qinggan.bluetoothphone | phone-num-mod |
-| SystemServiceStub | com.qinggan.systemservice | app-multi-display, voboost-to-menu-mod, forced-ev-mod |
+| SystemServiceStub | com.qinggan.systemservice | app-multi-display-mod, voboost-to-menu-mod, forced-ev-mod |
 | QgimeStub | com.qinggan.app.qgime | keyboard-ru-mod, keyboard-lock-en-mod |
-| VehicleSettingStub | com.qinggan.app.vehiclesetting | ADAS-activation-mod, low-speed-sound-mod |
-
-## CanBus Testing
-
-The `canbus.test.js` file tests agents that use `CanBusManager` across multiple processes:
-
-- **forced-ev-mod** - Injects into `systemservice` process
-- **low-speed-sound-mod** - Injects into `vehiclesetting` process
-
-To run CanBus tests:
-```bash
-npm run test:canbus
-```
-
-To start the required stubs for CanBus testing:
-```bash
-npm run start:canbus  # Starts both systemservice and vehiclesetting stubs
-```
+| VehicleSettingStub | com.qinggan.app.vehiclesetting | adas-activation-mod, low-speed-sound-mod |
 
 ## Testing
 
-### Optimized Testing Configuration
+### Test Architecture
 
-The project uses an AVA configuration that supports parallel execution with an option for serial debugging:
+The test suite uses PID-based injection for full parallelization:
 
-- **Parallel mode:** 100 concurrent workers for maximum performance
-- **Serial debugging:** Single worker for stability and debugging (via environment variable)
-- **Dynamic configuration:** Automatically selects mode based on environment variables
-- **Worker isolation:** Full process isolation in parallel mode
+- **TestUtils** (`lib/test-utils.js`) - High-level test utilities for common patterns
+- **TestFixtures** (`lib/test-fixtures.js`) - Centralized test configurations
+- **FridaTestHelper** (`lib/test-frida-helper.js`) - Low-level Frida operations
 
-### Run All Tests
+All tests run in parallel with PID-based injection, where each test gets its own isolated process.
+
+Error handling and process isolation tests are centralized in `test/error.test.js`.
+
+### Run Tests
 
 ```bash
-npm test                    # Runs tests in parallel mode (default)
-npm run test:verbose        # Verbose output in parallel mode
-AVA_PARALLEL=false npm test # Runs tests in serial mode for debugging
+npm test              # Run all tests
 ```
 
 ### Run Specific Test Files
 
 ```bash
-npm run test:launcher        # Test launcher stub
-npm run test:phone          # Test Bluetooth phone stub
-npm run test:system         # Test system service stub
-npm run test:qgime          # Test QGIME stub
-npm run test:vehicle        # Test vehicle setting stub
-npm run test:canbus         # Test CanBus functionality (uses system & vehicle stubs)
+npm run test:launcher   # Test launcher stub
+npm run test:phone      # Test Bluetooth phone stub
+npm run test:system     # Test system service stub
+npm run test:keyboard   # Test keyboard stub
+npm run test:vehicle    # Test vehicle setting stub
 ```
 
-### Test Execution Modes
+### Test Files
 
-The consolidated configuration supports parallel execution with serial debugging option:
-
-**Parallel Mode (Default):**
-- 100 concurrent workers for maximum performance
-- Worker isolation with unique process IDs
-- Optimized for CI/CD pipelines and multi-core systems
-- 60 second timeout per test
-
-**Serial Debugging Mode:**
-- Single worker execution for maximum stability
-- Easier debugging and tracing
-- Use `AVA_PARALLEL=false npm test` when tests have dependencies or need debugging
-
-### Test Architecture
-
-The test suite uses a modern architecture with proper process isolation:
-
-- **ProcessManager** ([`lib/test-process-manager.js`](lib/test-process-manager.js)) - Manages process lifecycle with locking to prevent race conditions
-- **TestUtils** ([`lib/test-utils.js`](lib/test-utils.js)) - High-level test utilities for common patterns
-- **TestFixtures** ([`lib/test-fixtures.js`](lib/test-fixtures.js)) - Centralized test configurations
-- **FridaTestHelper** ([`lib/test-frida-helper.js`](lib/test-frida-helper.js)) - Low-level Frida operations
+| File | Description |
+|------|-------------|
+| launcher.test.js | Launcher agents + multi-agent injection |
+| bluetoothphone.test.js | Bluetooth phone agents |
+| keyboard.test.js | Keyboard agents + multi-agent injection |
+| systemservice.test.js | System service agents + multi-agent injection |
+| vehiclesetting.test.js | Vehicle setting agents + multi-agent injection |
+| error.test.js | Shared error handling + process isolation tests |
 
 ### Writing Tests
+
+#### Basic Injection Test
 
 ```javascript
 import test from 'ava';
 import { TestUtils } from '../lib/test-utils.js';
 
-// Global cleanup after all tests
-test.after.always(async () => {
-    await TestUtils.cleanupAll();
-});
-
-test('my test', async t => {
-    const result = await TestUtils.runStandardAgentTest(
-        t,
-        'agent-name',
-        'process-name',
-        { params: { /* custom params */ } }
-    );
-    t.true(result.success);
+test('my-agent: default injection', async (t) => {
+    await TestUtils.runBasicInjectionTest(t, 'my-agent', 'target-process');
 });
 ```
 
-### Test Features
+#### Multi-Agent Injection Test
 
-- **Process Isolation** - Tests use locking to prevent race conditions
-- **Process Reuse** - Processes are reused across tests for performance
-- **Automatic Cleanup** - ProcessManager handles cleanup automatically
-- **Simplified API** - TestUtils provides high-level test methods
-- **Centralized Config** - Test configurations in one place
-
-## Manual Testing
-
-**Note**: `frida-inject` is required for passing parameters to agents. Make sure it's installed as described in the Prerequisites section.
-
-**macOS/Linux:**
-```bash
-# List running processes
-frida-ps
-
-# Inject agent manually with parameters (use process name, not 'java')
-frida-inject -n com.qinggan.app.launcher -l ../voboost-script/build/weather-widget-mod_3debug.js --parameters='{"key":"value"}'
+```javascript
+test('process: multi-agent injection', async (t) => {
+    const agents = ['agent1', 'agent2', 'agent3'];
+    await TestUtils.runMultipleAgentsTest(t, 'target-process', agents);
+});
 ```
 
-**Windows:**
-```powershell
-# List running processes
-frida-ps
+#### Error Handling Test
 
-# Inject agent manually with parameters (use process name, not 'java')
-frida-inject -n com.qinggan.app.launcher -l ..\voboost-script\build\weather-widget-mod_3debug.js --parameters='{\"key\":\"value\"}'
+```javascript
+test('process: error handling', async (t) => {
+    await TestUtils.runErrorHandlingTest(t, 'valid-agent', 'valid-process');
+});
 ```
 
-## Code Style
+## Test Utilities
 
-This project follows the unified Voboost code style from [voboost-codestyle](../voboost-codestyle).
+### Primary Methods
 
-### Linting and Formatting
+#### `runBasicInjectionTest(t, agentName, processName)`
+Simplified basic injection test with built-in assertions.
 
-```bash
-npm run lint      # Fix all JS and Java files
-npm run lint:js   # Fix JS files only (ESLint + Prettier)
-npm run lint:java # Fix Java files only (checkstyle)
-```
+**Features:**
+- Handles all setup, injection, validation, and cleanup automatically
+- Includes primary assertion for validation success
+- Logs detailed information only on test failure
+- Uses PID-based injection for full parallelization
 
-### Rules
-- **JavaScript**: 100 char line, 4 spaces, single quotes, no console except Logger
-- **Java**: Checkstyle configuration from voboost-codestyle
+#### `runMultipleAgentsTest(t, processName, agentNames, options)`
+Injects multiple agents into the same process.
 
-See [voboost-codestyle README](../voboost-codestyle/README.md) for full documentation.
+**Options:**
+- `assertSuccess` (default: true) - Assert that all injections succeed
+- `assertValidation` (default: true) - Assert that all validations pass
+- `timeout` - Custom timeout for injections
+- `successMessage` - Custom success message for assertions
+
+**Features:**
+- Injects multiple agents into the same process sequentially
+- Includes built-in assertions for all injections and validations
+- Uses PID-based injection for process isolation
+- Automatically handles cleanup
+
+#### `runErrorHandlingTest(t, agentName, processName)`
+Standardized error handling test for invalid scenarios.
+
+**Features:**
+- Tests invalid process names and agent scripts
+- Validates proper error handling and messaging
+- Uses standardized error assertion patterns
+
+### Advanced Methods
+
+#### `runStandardAgentTest(t, agentName, processName, options)`
+Full-featured agent test with extensive customization options.
+
+**Options:**
+- `params` - Custom parameters for the agent
+- `timeout` - Test timeout
+- `customValidation` - Custom validation function
+
+#### `createAgentTestConfig(agentName, processName, options)`
+Creates a complete agent test configuration with proper defaults.
+
+#### `cleanup()`
+Cleanup method for tests. Should be called in `test.after.always` hooks if needed.
 
 ## Project Structure
 
@@ -316,19 +264,24 @@ voboost-stubs/
 ├── build/                          # Build output directory
 │   ├── *.jar                       # Compiled JAR files
 │   └── classes/                    # Compiled classes
-├── lib/                            # Test infrastructure
-│   ├── test-frida-helper.js        # Low-level Frida operations
-│   ├── test-utils.js               # High-level test utilities
-│   ├── test-process-manager.js     # Process lifecycle management
-│   └── test-fixtures.js            # Test configurations
-├── test/                           # Test files
-│   ├── bluetoothphone.test.js      # Bluetooth phone stub tests
-│   ├── canbus.test.js              # CanBus stub tests
-│   ├── launcher.test.js            # Launcher stub tests
-│   ├── qgime.test.js               # QGIME stub tests
-│   ├── systemservice.test.js       # System service stub tests
-│   ├── vehiclesetting.test.js      # Vehicle setting stub tests
-│   └── fixtures/                   # Test fixtures directory
+├── lib/                            # Test infrastructure (modular)
+│   ├── Utils.js                    # High-level test utilities + orchestration
+│   ├── Frida.js                    # Core Frida operations + process management
+│   ├── Fixtures.js                 # Test configurations and patterns
+│   ├── MultiAgent.js               # Multi-agent orchestration
+│   ├── ProcessHealth.js            # Health monitoring
+│   ├── Retry.js                    # Retry logic
+│   ├── ErrorHandler.js             # Error processing
+│   ├── Debug.js                    # Debugging utilities
+│   └── Injection.js                # Injection scheduling
+├── test/                           # Test files (all parallel)
+│   ├── bluetoothphone.test.js      # Bluetooth phone tests
+│   ├── error.test.js               # Error handling and process isolation tests
+│   ├── injection.test.js           # Core injection functionality
+│   ├── keyboard.test.js            # Keyboard tests
+│   ├── launcher.test.js            # Launcher tests
+│   ├── systemservice.test.js       # System service tests
+│   └── vehiclesetting.test.js      # Vehicle setting tests
 ├── config/                         # Configuration files
 │   ├── config-ava.mjs              # AVA test configuration
 │   └── config-eslint.mjs           # ESLint configuration
@@ -338,6 +291,7 @@ voboost-stubs/
 ## Gradle Tasks
 
 ### Build Tasks
+
 **macOS/Linux:**
 ```bash
 ./gradlew build                    # Build all stubs
@@ -355,6 +309,7 @@ voboost-stubs/
 ```
 
 ### Run Tasks
+
 **macOS/Linux:**
 ```bash
 ./gradlew runLauncherStub          # Run launcher stub
@@ -373,16 +328,79 @@ voboost-stubs/
 .\gradlew.bat runVehicleSettingStub # Run vehicle setting stub
 ```
 
-### Style Check Tasks
+## Manual Testing
+
+**Note**: `frida-inject` is required for passing parameters to agents.
+
 **macOS/Linux:**
 ```bash
-./gradlew checkJavaStyle           # Run checkstyle on Java files
+# List running processes
+frida-ps
+
+# Inject agent manually with parameters
+frida-inject -n com.qinggan.app.launcher -s ../voboost-script/build/weather-widget-mod.js --parameters='{"key":"value"}'
 ```
 
 **Windows:**
 ```powershell
-.\gradlew.bat checkJavaStyle       # Run checkstyle on Java files
+# List running processes
+frida-ps
+
+# Inject agent manually with parameters
+frida-inject -n com.qinggan.app.launcher -s ..\voboost-script\build\weather-widget-mod.js --parameters='{\"key\":\"value\"}'
 ```
+
+## Troubleshooting
+
+### Common Issues
+
+#### Java Bridge Errors on ARM64 macOS
+```bash
+# Increase delays between injections
+export AGENT_DELAY=3000
+npm test
+```
+
+#### Memory Issues in Multi-Agent Tests
+```javascript
+// In test configuration:
+await Utils.runMultipleAgentsTest(t, 'launcher', agents, {
+    maxMemoryMb: 1024,
+    agentDelay: 3000
+});
+```
+
+#### Process Cleanup Issues
+```bash
+# Check for orphaned processes
+ps aux | grep java | grep Stub
+# Clean up if necessary
+pkill -f "java.*Stub"
+```
+
+### Debug Mode
+```bash
+# Enable debug logging
+DEBUG=1 npm test
+```
+
+## Code Style
+
+This project follows the unified Voboost code style from [voboost-codestyle](../voboost-codestyle).
+
+For AI agent rules and coding guidelines, see [AGENTS.md](AGENTS.md).
+
+### Linting and Formatting
+
+```bash
+npm run lint      # Fix all JS and Java files
+npm run lint:js   # Fix JS files only (ESLint + Prettier)
+npm run lint:java # Fix Java files only (checkstyle)
+```
+
+### Rules
+- **JavaScript**: 100 char line, 4 spaces, single quotes, console only in DEBUG mode
+- **Java**: Checkstyle configuration from voboost-codestyle
 
 ## License
 

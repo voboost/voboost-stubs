@@ -12,8 +12,8 @@ public class BaiduProviderUtil {
      * @return subscription info JSON string
      */
     public static String doQuerySubscribeInfo() {
-        // Original returns subscription info
-        // Agent hooks this to return activated status
+        // Original method returns subscription info
+        // Frida agents hook this method to return activated status
         System.out.println("[BaiduProviderUtil] doQuerySubscribeInfo() called");
         return "{\"expireStatus\":\"1\",\"isMqtt\":false,\"remainDays\":\"0\",\"subscriptionStatus\":\"0\"}";
     }
@@ -35,7 +35,7 @@ public class BaiduProviderUtil {
      */
     public static boolean isActivated() {
         System.out.println("[BaiduProviderUtil] isActivated() called");
-        return false; // Default to not activated, agents can hook this
+        return false; // Default to not activated, Frida agents can hook this method
     }
 
     /**
@@ -45,6 +45,6 @@ public class BaiduProviderUtil {
      */
     public static int getSubscriptionStatus() {
         System.out.println("[BaiduProviderUtil] getSubscriptionStatus() called");
-        return 0; // Default to inactive
+        return 0; // Default to inactive status
     }
 }
