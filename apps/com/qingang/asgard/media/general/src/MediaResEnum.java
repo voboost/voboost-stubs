@@ -7,6 +7,13 @@ public class MediaResEnum {
     public FieldWrapper mediaEnum;
 
     public MediaResEnum() {
-        mediaEnum = new FieldWrapper(new MediaEnum());
+        System.out.println("[MediaResEnum] MediaResEnum constructor called");
+        try {
+            mediaEnum = new FieldWrapper(new MediaEnum());
+            System.out.println("[MediaResEnum] MediaResEnum initialized successfully");
+        } catch (Exception e) {
+            System.out.println("[MediaResEnum] Error initializing MediaResEnum: " + e.getMessage());
+            e.printStackTrace();
+        }
     }
 }

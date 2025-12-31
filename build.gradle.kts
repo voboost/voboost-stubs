@@ -13,6 +13,8 @@ tasks.withType<Checkstyle>().configureEach {
 // Only enable specific checkstyle tasks when explicitly called
 tasks.named("checkJavaStyle") {
     enabled = true
+    // Disable configuration cache for this task
+    notCompatibleWithConfigurationCache("Checkstyle task has issues with configuration cache")
     // Override source directory to point to apps instead of src/main/java
     doFirst {
         // Configure checkstyle to look in the right directory
@@ -31,8 +33,25 @@ configurations.all {
     }
 }
 
-// Disable installDist task to prevent bin directory creation
+// Disable all tasks that might create bin directory
+tasks.matching { task -> task.name.contains("dist") || task.name.contains("installDist") || task.name.contains("startScripts") }.configureEach {
+    enabled = false
+}
+
+// Specifically disable the tasks that create bin directory
 tasks.named("installDist") {
+    enabled = false
+}
+tasks.named("distTar") {
+    enabled = false
+}
+tasks.named("distZip") {
+    enabled = false
+}
+tasks.named("assembleDist") {
+    enabled = false
+}
+tasks.withType<CreateStartScripts>().configureEach {
     enabled = false
 }
 
@@ -86,9 +105,9 @@ tasks.register<JavaExec>("runSystemServiceStub") {
     classpath = sourceSets.named("main").get().runtimeClasspath
 }
 
-tasks.register<JavaExec>("runQgimeStub") {
+tasks.register<JavaExec>("runKeyboardStub") {
     group = "application"
-    description = "Run QgimeStub"
+    description = "Run KeyboardStub"
     mainClass.set("com.qinggan.app.qgime.QgimeStub")
     classpath = sourceSets.named("main").get().runtimeClasspath
 }
