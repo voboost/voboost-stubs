@@ -27,7 +27,7 @@ Convert from single JVM project to multi-module Android Gradle project. Each stu
 ### D2. Android 9 (API 28) baseline, arm64-v8a only
 Target Android 9 (API 28) as minimum SDK, arm64-v8a architecture only. This matches the vehicle infotainment system requirements and reduces build complexity. *Rejected:* multi-architecture or older API levels - adds complexity without benefit for fixed target hardware.
 
-### D3. Foreground service for process persistence  
+### D3. Foreground service for process persistence
 Each APK runs a foreground service to keep the process alive for Frida injection. Android will otherwise kill background processes, making injection unreliable. The foreground service shows a persistent notification to prevent system termination. *Rejected:* background service or no service - processes would be killed by Android, unreliable for injection.
 
 ### D4. applicationId matches target process name
@@ -42,7 +42,7 @@ Current host-side JVM tests are not portable to Android. Device-side Android tes
 ## Risks / Trade-offs
 
 - [Increased build complexity] → Multi-module Android build is more complex than single JVM project, but matches real Android development
-- [Device dependency] → Testing requires Android device/emulator, but provides realistic injection targets  
+- [Device dependency] → Testing requires Android device/emulator, but provides realistic injection targets
 - [Foreground service notifications] → Each stub shows a persistent notification, but ensures process reliability for injection
 - [Removed mock classes] → Some existing host-side tests may break, but mocks didn't provide realistic Android behavior
 
@@ -54,4 +54,5 @@ Implementation follows the task breakdown in `tasks.md`. Key phases:
 3. Build verification and testing
 4. Documentation updates
 
-Rollback: Previous JVM stub code remains in git history if needed.
+Rollback: The legacy JVM stub code (`apps/`, `bin/`) has been deleted from the working tree; it remains recoverable from git history if ever needed.
+

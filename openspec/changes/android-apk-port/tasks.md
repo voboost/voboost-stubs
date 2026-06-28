@@ -10,24 +10,24 @@
 
 ## 2. Multi-module Android build conversion
 
-- [ ] 2.1 Update root build.gradle.kts from JVM application to multi-module Android project
-- [ ] 2.2 Configure Android build plugin repositories and dependencies
-- [ ] 2.3 Create shared build configuration for Android SDK and build tools versions
-- [ ] 2.4 Update settings.gradle.kts to include 5 new Android modules
-- [ ] 2.5 Configure common Android manifest permissions and shared dependencies
+- [x] 2.1 Update root build.gradle.kts from JVM application to multi-module Android project
+- [x] 2.2 Configure Android build plugin repositories and dependencies
+- [x] 2.3 Create shared build configuration for Android SDK and build tools versions
+- [x] 2.4 Update settings.gradle.kts to include 5 new Android modules
+- [x] 2.5 Configure common Android manifest permissions and shared dependencies
 
 ## 3. Individual stub module implementation
 
-- [ ] 3.1 Create launcher Android APK module with foreground service
-- [ ] 3.2 Create bluetoothphone Android APK module with foreground service  
-- [ ] 3.3 Create systemservice Android APK module with foreground service
-- [ ] 3.4 Create qgime Android APK module with foreground service
-- [ ] 3.5 Create vehiclesetting Android APK module with foreground service
-- [ ] 3.6 Ensure each module uses correct applicationId matching target process name
+- [x] 3.1 Create launcher Android APK module with foreground service
+- [x] 3.2 Create bluetoothphone Android APK module with foreground service
+- [x] 3.3 Create systemservice Android APK module with foreground service
+- [x] 3.4 Create qgime Android APK module with foreground service
+- [x] 3.5 Create vehiclesetting Android APK module with foreground service
+- [x] 3.6 Ensure each module uses correct applicationId matching target process name
 
 ## 4. Build verification
 
-- [ ] 4.1 Verify each module builds successfully as Android APK
+- [x] 4.1 Verify each module builds successfully as Android APK
 - [ ] 4.2 Verify APK installation on Android device/emulator via adb
 - [ ] 4.3 Verify foreground service keeps each process alive for injection
 - [ ] 4.4 Verify process names match expected injection targets
@@ -35,7 +35,13 @@
 
 ## 5. Documentation updates
 
-- [ ] 5.1 Update README.md with Android APK build and deployment instructions
-- [ ] 5.2 Document each stub's purpose, applicationId, and process name
-- [ ] 5.3 Update AGENTS.md with new Android stub architecture
-- [ ] 5.4 Add troubleshooting guide for common Android build/deployment issues
+- [x] 5.1 Update README.md with Android APK build and deployment instructions
+- [x] 5.2 Document each stub's purpose, applicationId, and process name
+- [x] 5.3 Update AGENTS.md with new Android stub architecture
+- [x] 5.4 Add troubleshooting guide for common Android build/deployment issues
+
+## 6. Legacy code removal
+
+- [x] 6.1 Delete legacy host-side JVM stub code under `apps/` (tracked) and `bin/` (build output)
+- [x] 6.2 Remove `apps/` references from README.md, AGENTS.md, and openspec docs
+- [x] 6.3 Verify `./gradlew buildAllStubs` still passes after legacy removal

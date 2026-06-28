@@ -20,14 +20,14 @@ names, lifecycle, and security boundaries that exist in production.
 This repository is part of the Voboost platform — see
 [Relationship to other repos](#relationship-to-other-repos) below.
 
-## Migration status
+## Architecture
 
-The project is migrating from host-side JVM stub `main()` classes (still
-present under [`apps/`](apps/) for reference) to multi-module Android APK
-targets. The new APK modules live under their own top-level directories
-(`launcher/`, `bluetoothphone/`, `systemservice/`, `qgime/`, `vehiclesetting/`).
+The project provides multi-module Android APK stub targets for Frida injection
+testing. Each stub lives under its own top-level directory (`launcher/`,
+`bluetoothphone/`, `systemservice/`, `qgime/`, `vehiclesetting/`) and builds an
+installable APK whose `applicationId` matches the real vehicle process name.
 
-The design and rationale for this migration are documented as an OpenSpec
+The design and rationale for this architecture are documented as an OpenSpec
 change in [`openspec/changes/android-apk-port/`](openspec/changes/android-apk-port/).
 
 ## Prerequisites
@@ -140,7 +140,6 @@ voboost-stubs/
 ├── systemservice/       # Android APK stub module (com.qinggan.systemservice)
 ├── qgime/               # Android APK stub module (com.qinggan.app.qgime)
 ├── vehiclesetting/      # Android APK stub module (com.qinggan.app.vehiclesetting)
-├── apps/                # Legacy host-side JVM stub classes (being phased out)
 ├── lib/                 # JS test infrastructure (modular)
 ├── test/                # AVA test files (parallel)
 ├── config/              # AVA + ESLint configuration

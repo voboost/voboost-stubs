@@ -7,15 +7,17 @@
 - `npm test`: Run test suite
 - `npm test:verbose`: Run tests in verbose mode
 - `npm test:*`: Run specific tests
-- `npm start`: Build all stub JARs and start all stub applications
-- `npm start:*`: Start specific stub application
+- `./gradlew buildAllStubs`: Build all stub APKs
 - `npm run lint`: Fix all JS and Java files
 - `npm run lint:js`: Fix JS files only (ESLint + Prettier)
 - `npm run lint:java`: Fix Java files only (checkstyle)
-- `npm run build`: Build Java stub applications
 
 # Project Structure
-- **apps/**: Java stub applications
+- **launcher/**: Android APK stub module (com.qinggan.app.launcher)
+- **bluetoothphone/**: Android APK stub module (com.qinggan.bluetoothphone)
+- **systemservice/**: Android APK stub module (com.qinggan.systemservice)
+- **qgime/**: Android APK stub module (com.qinggan.app.qgime)
+- **vehiclesetting/**: Android APK stub module (com.qinggan.app.vehiclesetting)
 - **lib/**: Consolidated test infrastructure
 - **config/**: Configuration files
   - `config-ava.mjs`: AVA test configuration
