@@ -1,5 +1,7 @@
 # voboost-stubs
 
+**English** | [Русский](README.ru.md)
+
 Android stub APK applications that serve as realistic Frida injection targets
 for the Voboost system during development and testing.
 
@@ -205,4 +207,7 @@ DEBUG=1 npm test
 
 ## License
 
-GPL-3.0
+Dual-licensed:
+
+- [PolyForm Noncommercial 1.0.0](https://github.com/voboost/voboost-license/blob/main/LICENSE) — free for personal use
+- [Commercial license](https://github.com/voboost/voboost-license/blob/main/COMMERCIAL.md) — required otherwise
