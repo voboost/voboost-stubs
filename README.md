@@ -1,5 +1,7 @@
 # voboost-stubs
 
+**English** | [Русский](README.ru.md)
+
 Android stub APK applications that serve as realistic Frida injection targets
 for the Voboost system during development and testing.
 
