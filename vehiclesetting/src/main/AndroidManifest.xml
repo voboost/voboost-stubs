@@ -19,6 +19,14 @@
             </intent-filter>
         </activity>
 
+        <!-- Real settings-menu screen the settings-menu agent hooks
+             (CarSettingActivity.onCreate); declared (not launcher) so
+             `am start -n com.qinggan.app.vehiclesetting/.CarSettingActivity`
+             works the same way it does on the real device. -->
+        <activity
+            android:name="com.qinggan.app.vehiclesetting.CarSettingActivity"
+            android:exported="true" />
+
         <service
             android:name="com.qinggan.app.vehiclesetting.VehicleSettingService"
             android:exported="false" />
