@@ -3,5 +3,8 @@ build/
 bin/
 node_modules/
 
+# Local working notes / scratch (not part of the source tree)
+plans/
+
 # JVM crash logs
 hs_err_pid*.log
