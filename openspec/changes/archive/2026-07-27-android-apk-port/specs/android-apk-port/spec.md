@@ -48,3 +48,15 @@ The existing host-side JVM tests SHALL NOT be ported to the Android APK modules.
 #### Scenario: Host-side tests not ported
 - **WHEN** the Android APK modules are implemented
 - **THEN** previous host-side JVM tests are not ported, and device testing focuses on injection validation rather than unit tests
+
+## Unverified
+
+### Requirement: Foreground service keeps process alive
+
+The "Foreground service to keep process alive" SHALL above is gated only by
+static inspection of the service/notification code in each module; it has not
+been verified at runtime on an Android device/emulator in this session (the
+tasks.md verification steps 4.2-4.5 — install each APK, confirm the foreground
+service runs and keeps the process alive for injection — were not executed).
+The code is present and builds; the runtime behavior is pending a device
+pass.
